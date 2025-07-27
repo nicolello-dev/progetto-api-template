@@ -24,15 +24,21 @@ gen:
 test: build
 	@for file in tests/*.txt tests/generated/*.txt; do \
 		echo "Testing $$file"; \
-		./dist/main < $$file | diff - $$file.result; \
-		if [ $$? -ne 0 ]; then \
-			echo "Test failed for $$file"; \
+		tmpfile=$$(mktemp); \
+		./dist/main < $$file > $$tmpfile; \
+		if ! diff -q $$file.result $$tmpfile; then \
+			echo "\033[31mTest failed for $$file\033[0m"; \
+			printf "\033[1m%-38s %-38s\033[0m\n" "EXPECTED" "ACTUAL"; \
+			echo "\033[31m----------------------------------------\033[0m"; \
+			diff --color=always -y -W 80 $$file.result $$tmpfile; \
+			rm $$tmpfile; \
 			exit 1; \
 		else \
-			echo "Test passed for $$file"; \
+			echo "\033[32mTest passed for $$file\033[0m"; \
 		fi; \
+		rm $$tmpfile; \
 	done
-	echo "All tests passed!"
+	@echo "\033[32mAll tests passed!\033[0m"
 
 .PHONY: project gen test clean
 
