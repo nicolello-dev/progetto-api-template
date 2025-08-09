@@ -2,7 +2,7 @@ CC := gcc
 CFLAGS += -DEVAL -std=gnu11 -Wall -Werror -pipe -s -static -O2
 LDFLAGS += -lm
 
-all: build gen test
+all: build gen solve test
 
 build:
 	@mkdir -p dist
@@ -20,6 +20,24 @@ gen:
 		echo "Generated $$input_file and $$result_file"; \
 	done
 
+update:
+	@git stash
+	@git pull
+	@git stash pop
+
+solve:
+	@echo "Solving test cases..."
+	@echo "This may take a very long time"
+	@for file in tests/*.txt tests/generated/*.txt; do \
+		if [ ! -f $$file.result ]; then \
+			echo "Solving $$file"; \
+			result_file=$$file.result; \
+			bin/solver < $$file > $$result_file; \
+			echo "Solved $$file and created $$result_file"; \
+		else \
+			echo "Skipping $$file, already solved."; \
+		fi; \
+	done
 
 test: build
 	@for file in tests/*.txt tests/generated/*.txt; do \
