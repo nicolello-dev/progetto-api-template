@@ -1,6 +1,9 @@
 CC := gcc
-CFLAGS += -DEVAL -std=gnu11 -Wall -Werror -pipe -s -static -O2
+DFLAGS := -DEVAL -std=gnu11 -Wall -Werror -pipe
+CFLAGS += $(DFLAGS) -s -static -O2
+CFLAGSDBG = $(DFLAGS) -g -O0 -fno-omit-frame-pointer
 LDFLAGS += -lm
+DBG_INPUT_FILE = tests/example.txt
 
 all: build gen solve test
 
@@ -8,6 +11,16 @@ build:
 	@mkdir -p dist
 	@echo "Building project..."
 	$(CC) $(CFLAGS) -o dist/main main.c $(LDFLAGS)
+
+debug: build
+	@echo "Building project in debug mode..."
+	$(CC) $(CFLAGSDBG) -o dist/main-debug main.c $(LDFLAGS)
+	@echo "### Running memgrind ###"
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --expensive-definedness-checks=yes --dsymutil=yes ./dist/main-debug < $(DBG_INPUT_FILE) > /dev/null
+	@echo "### Running cachegrind ###"
+	valgrind --tool=cachegrind ./dist/main-debug < $(DBG_INPUT_FILE) > /dev/null
+	@echo "### Running callgrind ###"
+	valgrind --tool=callgrind ./dist/main-debug < $(DBG_INPUT_FILE) > /dev/null
 
 gen:
 	@mkdir -p tests/generated
@@ -63,3 +76,5 @@ test: build
 clean:
 	rm -f *.o dist/main
 	rm -rf tests/generated dist/
+	rm -f callgrind.out.*
+	rm -f cachegrind.out.*

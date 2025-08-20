@@ -88,8 +88,6 @@ Per rimuoverlo, elimina sia il file di input che il file di output generato, `<f
 
 Compila il codice, genera test automatizzati, risolve test personalizzati e ne verifica i risultati, in questo ordine
 
-_Molto probabilmente userai solo questo comando_
-
 ```
 make
 ```
@@ -100,6 +98,21 @@ Compila il codice
 
 ```
 make build
+```
+
+### debug
+
+NOTA: Probabilmente devi scaricare valgrind, di solito non è incluso nelle distribuzioni di Linux. Per Debian/Ubuntu puoi usare `sudo apt-get install valgrind`.
+
+Compila il codice con simboli per il debug (-g) e gira [valgrind](https://valgrind.org), utile se si hanno segmentation faults o si crede di leggere memoria out of bounds.
+
+Gira valgrind, callgrind e cachegrind; gli due ultimi genereranno due file, `callgrind.out.<pid>` e `cachegrind.out.<pid>` rispettivamente. Consiglio usare `kcachegrind` per leggerli e capire meglio come ottimizzare il codice.
+
+Il codice girerà circa 300x più lentamente, per cui di default usa il test `example.txt`.
+Se vuoi usare un file diverso, lo puoi impostare modificando `DBG_INPUT_FILE` nel `Makefile`.
+
+```
+make debug
 ```
 
 ### test
@@ -118,12 +131,28 @@ Genera nuovi test casuali usando il generatore del prof.
 make gen
 ```
 
+## solve
+
+Risolve i vari test che vengono messi nella cartella `tests`. Utile per aggiungere dei propri input di prova
+
+```
+make solve
+```
+
 ## clean
 
 Elimina file compilati, testcase _generati_ (`/tests/generated`), etc.
 
 ```
 make clean
+```
+
+## update
+
+Aggiorna la repository alla versione più recente, mantenendo i dati salvati (fa `git stash && git pull && git stash pop`)
+
+```
+make update
 ```
 
 # Struttura cartelle
